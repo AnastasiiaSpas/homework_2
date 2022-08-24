@@ -13,13 +13,12 @@ const SelectedLanguages = memo((props) => {
 						onClick={()=>props.selectedLanguageHandler(language)} 
 						className='popular-container__list__tab'
 					>
-						<Link to={`/popular/${language}`} className={language===languageParams? `active`: ``} key={index}>{language}</Link>
+						{!props.disabledBtn? <Link to= {`/popular/${language}`} className={language===languageParams? `active`: ``} key={index}>{language}</Link> 
+						: <Link to= {`#`} className={`disabled`} key={index}>{language}</Link>}
 					</li>
 				))}
 			</ul>
 	);
-}, (prevProps, nextProps)=>{
-	return prevProps.selectedLanguage === nextProps.selectedLanguage
 })
 
 export default SelectedLanguages;

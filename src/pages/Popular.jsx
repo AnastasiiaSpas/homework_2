@@ -8,23 +8,49 @@ import { InfinitySpin } from  'react-loader-spinner'
 const Popular = () =>  {
 	const [selectedLanguage, setSelectedLanguage] = useState(`All`)
 	const [repos, setRepos] = useState([])
-	const [load, setLoad] = useState()
+	const [load, setLoad] = useState(false)
 	const {languageParams} = useParams()
+	const [disabledBtn, setDisabledBtn] = useState(false)
+	
+	const useDebounce = (value, delay) => {
+		const [debouncedValue, setDebouncedValue] = useState(value);
+		useEffect(
+		  () => {
+			 const handler = setTimeout(() => {
+				setDebouncedValue(value)
+			 }, delay);
+			 return () => {
+				clearTimeout(handler)
+			 };
+		  },
+		  [value, delay]
+		);
+		return debouncedValue;
+	}
+
+	const debouncedLanguage = useDebounce(languageParams, 1500);
 
 	const selectedLanguageHandler = async(language) => {
 		setSelectedLanguage(language)
+		setDisabledBtn(true)
 	}
 
 	useEffect(()=>{
 		if(languageParams){
 			(async()=>{
+				setDisabledBtn(true)
 				setLoad(true)
-				let getRepos = await githubRepos(languageParams)
+				let getRepos = await githubRepos(debouncedLanguage)
 				setRepos(getRepos)
-				if(repos) setLoad(false)
+				if(getRepos){
+					setDisabledBtn(false)
+					setLoad(false)
+				}
 			})()
 		}
-	},[languageParams])
+	},[debouncedLanguage])
+
+	console.log(disabledBtn)
 
 	return (
 		<div className='popular-container'>
@@ -32,6 +58,7 @@ const Popular = () =>  {
 				selectedLanguage={selectedLanguage}
 				selectedLanguageHandler={selectedLanguageHandler}
 				languageParams={languageParams}
+				disabledBtn={disabledBtn}
 			/>
 			{load?
 				<div className='Preloader'>
